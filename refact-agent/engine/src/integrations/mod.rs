@@ -9,6 +9,7 @@
 
 
 pub mod integr_abstract;
+pub mod integr_ollama;
 pub mod integr_github;
 pub mod integr_gitlab;
 pub mod integr_pdb;

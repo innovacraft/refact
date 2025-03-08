@@ -51,6 +51,7 @@ class TabHostModelsAssign(BaseModel):
     gemini_api_enable: bool = False
     xai_api_enable: bool = False
     deepseek_api_enable: bool = False
+    ollama_api_enable: bool = False
 
     model_config = ConfigDict(protected_namespaces=())  # avoiding model_ namespace protection
 

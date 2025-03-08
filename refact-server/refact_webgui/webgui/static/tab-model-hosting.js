@@ -206,6 +206,7 @@ function get_models()
         integration_switch_init('enable_gemini', models_data['gemini_api_enable']);
         integration_switch_init('enable_xai', models_data['xai_api_enable']);
         integration_switch_init('enable_deepseek', models_data['deepseek_api_enable']);
+        integration_switch_init('enable_ollama', models_data['ollama_api_enable']);
 
         const more_gpus_notification = document.querySelector('.model-hosting-error');
         if(data.hasOwnProperty('more_models_than_gpus') && data.more_models_than_gpus) {
@@ -234,6 +235,7 @@ function save_model_assigned() {
     const gemini_enable = document.querySelector('#enable_gemini');
     const xai_enable = document.querySelector('#enable_xai');
     const deepseek_enable = document.querySelector('#enable_deepseek');
+    const ollama_enable = document.querySelector('#enable_ollama');
 
     const data = {
         model_assign: {
@@ -246,6 +248,7 @@ function save_model_assigned() {
         gemini_api_enable: gemini_enable.checked,
         xai_api_enable: xai_enable.checked,
         deepseek_api_enable: deepseek_enable.checked,
+        ollama_api_enable: ollama_enable.checked,
     };
 
     fetch("/tab-host-models-assign", {

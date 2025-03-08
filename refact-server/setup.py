@@ -34,17 +34,17 @@ all_refact_packages = {
     ),
     "refact_webgui": PyPackage(
         requires=["aiohttp", "aiofiles", "cryptography", "fastapi>=0.111.0", "giturlparse", "pydantic>=2",
-                  "starlette==0.37.2", "uvicorn", "uvloop", "termcolor", "python-multipart", "more_itertools",
+                  "starlette==0.37.2", "uvicorn", "termcolor", "python-multipart", "more_itertools",
                   "scyllapy==1.3.0", "pandas>=2.0.3", "litellm>=1.61.15"],
         requires_packages=["refact_known_models", "refact_utils"],
         data=["webgui/static/*", "webgui/static/components/modals/*",
               "webgui/static/dashboards/*", "webgui/static/assets/*", "webgui/static/utils/*",
               "webgui/static/assets/fonts/*"]),
     "self_hosting_machinery": PyPackage(
-        requires=["python-multipart", "auto-gptq==0.7.1", "accelerate",
-                  "termcolor", "torch", "transformers==4.47.1",  # Qwen2 is completely changed in transformers>=4.48
-                  "bitsandbytes", "safetensors", "peft", "triton",
-                  "torchinfo", "mpi4py", "deepspeed>=0.15.3",
+        requires=["python-multipart", "accelerate",
+                  "termcolor", "transformers==4.47.1",  # Qwen2 is completely changed in transformers>=4.48
+                  "safetensors", "peft",
+                  "torchinfo", "mpi4py",
                   "sentence-transformers", "huggingface-hub>=0.26.2",
                   "aiohttp", "setproctitle", "google-auth>=2.37.0"],
         optional=["ninja", "flash-attn"],

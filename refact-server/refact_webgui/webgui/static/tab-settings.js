@@ -177,6 +177,7 @@ function save_integration_api_keys() {
     const gemini_api_key = document.getElementById("gemini_api_key");
     const xai_api_key = document.getElementById('xai_api_key');
     const deepseek_api_key = document.getElementById('deepseek_api_key');
+    const ollama_api_key = document.getElementById('ollama_api_key');
 
     const huggingface_api_key = document.getElementById('huggingface_api_key');
     fetch("/tab-settings-integrations-save", {
@@ -245,6 +246,7 @@ export function tab_settings_integrations_get() {
             integrations_input_init(document.getElementById('gemini_api_key'), data['gemini_api_key']);
             integrations_input_init(document.getElementById('xai_api_key'), data['xai_api_key']);
             integrations_input_init(document.getElementById('deepseek_api_key'), data['deepseek_api_key']);
+            integrations_input_init(document.getElementById('ollama_api_key'), data['ollama_api_key']);
 
             integrations_input_init(document.getElementById('huggingface_api_key'), data['huggingface_api_key']);
         });

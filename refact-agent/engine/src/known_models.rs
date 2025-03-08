@@ -1,3 +1,6 @@
+mod ollama;
+use ollama::KNOWN_MODELS_OLLAMA;
+
 pub const KNOWN_MODELS: &str = r####"
 {
     "code_completion_models": {

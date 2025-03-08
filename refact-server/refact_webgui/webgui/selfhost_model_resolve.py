@@ -5,6 +5,12 @@ from typing import Tuple, List, Optional
 
 
 def static_resolve_model(model_name: str, inference_queue: InferenceQueue) -> Tuple[str, str]:
+    # Handle Ollama models
+    if model_name.startswith("ollama/"):
+        if inference_queue.model_assigner.model_assignment.get("ollama_api_enable", False):
+            return model_name, ""
+        return "", "Ollama API is not enabled"
+
     # special case for longthink
     if model_name in ["longthink", "gpt3.5", "gpt4"]:
         model_name = "longthink/stable"
@@ -36,6 +42,11 @@ def static_resolve_model(model_name: str, inference_queue: InferenceQueue) -> Tu
 
 
 def resolve_model_context_size(model_name: str, model_assigner: ModelAssigner) -> Optional[int]:
+    # Handle Ollama models with default context size
+    if model_name.startswith("ollama/"):
+        OLLAMA_DEFAULT_CONTEXT = 8192  # Default context size for Ollama models
+        return OLLAMA_DEFAULT_CONTEXT
+
     if model_name in model_assigner.models_db:
         return model_assigner.model_assignment["model_assign"][model_name]["n_ctx"]
 

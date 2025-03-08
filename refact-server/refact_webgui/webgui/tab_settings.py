@@ -27,6 +27,7 @@ class TabSettingsRouter(APIRouter):
         gemini_api_key: Optional[str] = None
         xai_api_key: Optional[str] = None
         deepseek_api_key: Optional[str] = None
+        ollama_api_key: Optional[str] = None
 
         huggingface_api_key: Optional[str] = None
 
