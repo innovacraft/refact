@@ -4,6 +4,19 @@ use ollama::KNOWN_MODELS_OLLAMA;
 pub const KNOWN_MODELS: &str = r####"
 {
     "code_completion_models": {
+        "ollama/codellama": {
+            "n_ctx": 8192,
+            "supports_scratchpads": {
+                "FIM-PSM": {
+                    "fim_prefix": "<PRE>",
+                    "fim_suffix": "<SUF>",
+                    "fim_middle": "<MID>",
+                    "eot": "</s>",
+                    "context_format": "llama"
+                }
+            },
+            "default_scratchpad": "FIM-PSM"
+        },
         "bigcode/starcoder": {
             "n_ctx": 4096,
             "supports_scratchpads": {
@@ -352,6 +365,23 @@ pub const KNOWN_MODELS: &str = r####"
         }
     },
     "code_chat_models": {
+        "ollama/codellama": {
+            "n_ctx": 8192,
+            "supports_tools": true,
+            "supports_multimodality": false,
+            "supports_agent": true,
+            "supports_scratchpads": {
+                "CHAT-GENERIC": {
+                    "token_bos": "",
+                    "token_esc": "",
+                    "keyword_system": "### System:\n",
+                    "keyword_user": "### User:\n",
+                    "keyword_assistant": "### Assistant:\n",
+                    "eot": "</s>",
+                    "stop_list": ["</s>", "### User:", "### Assistant:", "### System:"]
+                }
+            }
+        },
         "gpt-4o": {
             "n_ctx": 128000,
             "supports_tools": true,
@@ -773,6 +803,7 @@ pub const KNOWN_MODELS: &str = r####"
         }
     },
     "tokenizer_rewrite_path": {
+        "ollama/codellama": "Xenova/Meta-Llama-3.1-Tokenizer",
         "Refact/1.6B": "smallcloudai/Refact-1_6B-fim",
         "starcoder2/3b": "bigcode/starcoder2-3b",
 

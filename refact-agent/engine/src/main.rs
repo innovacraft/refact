@@ -56,6 +56,7 @@ mod scratchpads;
 mod fetch_embedding;
 mod forward_to_hf_endpoint;
 mod forward_to_openai_endpoint;
+mod forward_to_ollama_endpoint;
 mod restream;
 
 mod call_validation;

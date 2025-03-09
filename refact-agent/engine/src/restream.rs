@@ -117,6 +117,23 @@ pub async fn scratchpad_interaction_not_stream_json(
             &parameters,
             meta
         ).await
+    } else if endpoint_style == "ollama" {
+        save_url = endpoint_template.clone();
+        let (gcx_locked, model) = {
+            let gcx_locked = gcx.read().await;
+            (gcx_locked.clone(), model_name.strip_prefix("ollama/").unwrap_or(&model_name).to_string())
+        };
+        
+        crate::forward_to_ollama_endpoint::forward_to_ollama_endpoint(
+            Arc::new(gcx_locked),
+            &endpoint_template,
+            &bearer,
+            &model,
+            vec![("user", prompt)],
+            &[],
+            parameters.temperature,
+            &parameters.stop,
+        ).await.map(|response| json!({"choices": [{"message": {"content": response}}]}))
     } else {
         crate::forward_to_openai_endpoint::forward_to_openai_style_endpoint(
             &mut save_url,
@@ -407,6 +424,25 @@ pub async fn scratchpad_interaction_stream(
                     &endpoint_template,
                     &my_parameters,
                     meta
+                ).await
+            } else if endpoint_style == "ollama" {
+                save_url = endpoint_template.clone();
+                let (gcx_locked, model) = {
+                    let gcx_locked = gcx.read().await;
+                    (gcx_locked.clone(), model_name.strip_prefix("ollama/").unwrap_or(&model_name).to_string())
+                };
+                
+                crate::forward_to_ollama_endpoint::forward_to_ollama_endpoint_streaming(
+                    Arc::new(gcx_locked),
+                    &endpoint_template,
+                    &bearer,
+                    &model,
+                    vec![("user", prompt.as_str())],
+                    &[],
+                    my_parameters.temperature,
+                    &my_parameters.stop,
+                    my_scratchpad.get_text_type(),
+                    my_scratchpad.get_text_cause(),
                 ).await
             } else {
                 crate::forward_to_openai_endpoint::forward_to_openai_style_endpoint_streaming(

@@ -45,6 +45,11 @@ pub fn integration_from_name(n: &str) -> Result<Box<dyn IntegrationTrait + Send 
         "mysql" => Ok(Box::new(integr_mysql::ToolMysql { ..Default::default() }) as Box<dyn IntegrationTrait + Send + Sync>),
         "docker" => Ok(Box::new(docker::integr_docker::ToolDocker {..Default::default() }) as Box<dyn IntegrationTrait + Send + Sync>),
         "shell" => Ok(Box::new(integr_shell::ToolShell {..Default::default() }) as Box<dyn IntegrationTrait + Send + Sync>),
+        "ollama" => Ok(Box::new(integr_ollama::OllamaIntegration {
+            api_key: "ollama".to_string(),
+            api_base: "http://localhost:11434".to_string(),
+            model: "codellama".to_string(),
+        }) as Box<dyn IntegrationTrait + Send + Sync>),
         cmdline if cmdline.starts_with("cmdline_") => {
             // let tool_name = cmdline.strip_prefix("cmdline_").unwrap();
             Ok(Box::new(integr_cmdline::ToolCmdline {..Default::default()}) as Box<dyn IntegrationTrait + Send + Sync>)
@@ -68,6 +73,7 @@ pub fn integrations_list(allow_experimental: bool) -> Vec<&'static str> {
         "chrome",
         "postgres",
         "mysql",
+        "ollama",
         "cmdline_TEMPLATE",
         "service_TEMPLATE",
         "mcp_TEMPLATE",
