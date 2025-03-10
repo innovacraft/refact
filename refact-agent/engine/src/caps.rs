@@ -433,7 +433,64 @@ fn _inherit_r1_from_r0(
     r1: &mut CodeAssistantCaps,
     r0: &ModelsOnly,
 ) {
-    // XXX: only patches running models, patch all?
+    // FORCE OLLAMA QWEN MODEL TO ALWAYS BE AVAILABLE FOR TESTING
+    // This is a direct addition to make the Qwen model appear unconditionally 
+    let force_ollama_model = true;
+    
+    // CRITICAL: Set defaults for IDE use - ensure the model appears as available
+    r1.preferred_chat_model = "qwen2.5:3b-instruct".to_string();
+    r1.preferred_completion_model = "qwen2.5:3b-instruct".to_string();
+    
+    // Make sure we're using the right API key
+    let is_ollama_api = r1.chat_apikey == "ollama" || r1.completion_apikey == "ollama";
+    if is_ollama_api {
+        info!("Using Ollama API key, ensuring models are properly registered");
+    }
+
+    if force_ollama_model {
+        // Create a standard model record with all capabilities enabled
+        let default_model_record = ModelRecord {
+            n_ctx: 2000,
+            supports_tools: true,
+            supports_multimodality: false,
+            supports_agent: true,
+            supports_scratchpads: {
+                let mut map = HashMap::new();
+                map.insert("PASSTHROUGH".to_string(), serde_json::Value::Object(serde_json::Map::new()));
+                map
+            },
+            default_scratchpad: "PASSTHROUGH".to_string(),
+            similar_models: Vec::new(),
+            supports_clicks: false,
+        };
+
+        // Add multiple variations of the Qwen model name to ensure it appears
+        let qwen_variations = vec![
+            "qwen2.5:3b-instruct".to_string(), 
+            "ollama/qwen2.5:3b-instruct".to_string(),
+            "qwen".to_string(),
+            // Add formats that might be expected by PyCharm
+            "qwen2.5-3b-instruct".to_string(),
+            "ollama-qwen".to_string(),
+            "ollama-qwen2.5-3b-instruct".to_string(),
+            "ollama_qwen".to_string(),
+            "qwen2.5".to_string()
+        ];
+
+        for model_name in qwen_variations {
+            info!("Forcing Ollama model {} to be available", model_name);
+            // Add to code_chat_models
+            r1.code_chat_models.insert(model_name.clone(), default_model_record.clone());
+            // Add to code_completion_models
+            r1.code_completion_models.insert(model_name.clone(), default_model_record.clone());
+            // Add to running_models if not already there
+            if !r1.running_models.contains(&model_name) {
+                r1.running_models.push(model_name);
+            }
+        }
+    }
+
+    // Now continue with the regular model loading code
     for k in r1.running_models.iter() {
         let k_stripped = strip_model_from_finetune(k);
 
@@ -447,6 +504,88 @@ fn _inherit_r1_from_r0(
             if rec_name == &k_stripped || rec.similar_models.contains(&k_stripped) {
                 r1.code_chat_models.insert(k.to_string(), rec.clone());
             }
+        }
+    }
+
+    // Special handling for Ollama models
+    // First, check if we're using Ollama API key, which means we should make all defined models visible
+    let is_ollama_api = r1.chat_apikey == "ollama" || r1.completion_apikey == "ollama";
+    
+    // Add explicitly defined Ollama models from the config
+    if is_ollama_api {
+        info!("Using Ollama API key, ensuring Qwen model is available");
+        
+        // Ensure qwen2.5:3b-instruct is added (regardless of what's in the config)
+        let default_model_record = ModelRecord {
+            n_ctx: 2000,
+            supports_tools: true,
+            supports_multimodality: false,
+            supports_agent: true,  // Agent support enabled
+            supports_scratchpads: {
+                let mut map = HashMap::new();
+                map.insert("PASSTHROUGH".to_string(), serde_json::Value::Object(serde_json::Map::new()));
+                map
+            },
+            default_scratchpad: "PASSTHROUGH".to_string(),
+            similar_models: Vec::new(),
+            supports_clicks: false,
+        };
+        
+        // Add to both code_chat_models and code_completion_models
+        r1.code_chat_models.insert("qwen2.5:3b-instruct".to_string(), default_model_record.clone());
+        r1.code_completion_models.insert("qwen2.5:3b-instruct".to_string(), default_model_record);
+        
+        // Add to running_models if not already there
+        if !r1.running_models.contains(&"qwen2.5:3b-instruct".to_string()) {
+            r1.running_models.push("qwen2.5:3b-instruct".to_string());
+            info!("Added Qwen model to running_models list");
+        }
+
+        // Also ensure it's available without a prefix since model names might differ
+        r1.code_chat_models.insert("qwen".to_string(), default_model_record.clone());
+        r1.code_completion_models.insert("qwen".to_string(), default_model_record.clone());
+        if !r1.running_models.contains(&"qwen".to_string()) {
+            r1.running_models.push("qwen".to_string());
+        }
+            
+        // Add any other existing Ollama models to running_models too
+        for (model_name, _) in r1.code_chat_models.iter() {
+            if !r1.running_models.contains(model_name) {
+                r1.running_models.push(model_name.clone());
+                info!("Added additional Ollama model {} to running_models", model_name);
+            }
+        }
+    }
+    
+    // Add Ollama models from the running_models list
+    for k in r1.running_models.iter() {
+        // If it's an Ollama model that isn't already in the models list
+        if (k.contains(":") || is_ollama_api) && (!r1.code_completion_models.contains_key(k) && !r1.code_chat_models.contains_key(k)) {
+            // Check if we have code_chat_models for this model already defined in r1
+            if let Some(_) = r1.code_chat_models.get(k) {
+                // The model is already defined in r1, no need to add it
+                continue;
+            }
+            
+            // Add a default model record for Ollama models
+            let default_model_record = ModelRecord {
+                n_ctx: 2000,
+                supports_tools: true,
+                supports_multimodality: false,
+                supports_agent: true,  // Enable agent support for all modes
+                supports_scratchpads: {
+                    let mut map = HashMap::new();
+                    map.insert("PASSTHROUGH".to_string(), serde_json::Value::Object(serde_json::Map::new()));
+                    map
+                },
+                default_scratchpad: "PASSTHROUGH".to_string(),
+                similar_models: Vec::new(),
+                supports_clicks: false,
+            };
+            
+            r1.code_chat_models.insert(k.to_string(), default_model_record.clone());
+            r1.code_completion_models.insert(k.to_string(), default_model_record);
+            info!("Added Ollama model {} to available models", k);
         }
     }
 

@@ -24,6 +24,9 @@ const THINKING_MODELS_LIST = ["o3-mini"];
 // TODO: hard coded for now. Unlimited usage models
 export const UNLIMITED_PRO_MODELS_LIST = ["gpt-4o-mini"];
 
+// Force Ollama models to be available
+export const FORCED_MODELS = ["qwen2.5:3b-instruct", "ollama/qwen2.5:3b-instruct", "qwen"];
+
 export function useCapsForToolUse() {
   const [wasAdjusted, setWasAdjusted] = useState(false);
   const caps = useGetCapsQuery();
@@ -69,9 +72,21 @@ export function useCapsForToolUse() {
 
   const usableModels = useMemo(() => {
     const models = caps.data?.code_chat_models ?? {};
+    
+    // Always include our forced Ollama models regardless of what's in code_chat_models
+    const alwaysIncludeModels = [...FORCED_MODELS];
+    
     const items = Object.entries(models).reduce<string[]>(
       (acc, [key, value]) => {
+        // Always show Ollama models regardless of their capabilities
+        if (key.includes("qwen") || key.startsWith("ollama/")) {
+          return [...acc, key];
+        }
+        
+        // Skip thinking models
         if (THINKING_MODELS_LIST.includes(key)) return acc;
+        
+        // Regular capability-based filtering
         if (toolUse === "explore" && value.supports_tools) {
           return [...acc, key];
         }
@@ -79,9 +94,11 @@ export function useCapsForToolUse() {
         if (toolUse === "quick") return [...acc, key];
         return acc;
       },
-      [],
+      alwaysIncludeModels,
     );
-    return items;
+    
+    // Make sure we have no duplicates
+    return [...new Set(items)];
   }, [caps.data?.code_chat_models, toolUse]);
 
   const usableModelsForPlan = useMemo(() => {
