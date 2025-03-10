@@ -1,0 +1,45 @@
+cloud_name: Ollama
+
+# Ollama for chat
+chat_endpoint: "http://host.docker.internal:11434/v1/chat/completions"
+chat_endpoint_style: "openai"
+chat_model: "qwen2.5:3b-instruct"
+
+# Ollama for completion
+completion_endpoint: "http://host.docker.internal:11434/v1/chat/completions"
+completion_endpoint_style: "openai"
+completion_model: "qwen2.5:3b-instruct"
+
+# Ollama for embeddings
+embedding_endpoint: "http://host.docker.internal:11434/v1/embeddings"
+embedding_model: "qwen2.5:3b-instruct"
+embedding_size: 4096
+
+# Disable telemetry (optional)
+telemetry_basic_dest: ""
+
+running_models:
+  - qwen2.5:3b-instruct  # Ollama model
+
+code_chat_models:
+  "qwen2.5:3b-instruct":
+    n_ctx: 2000
+    supports_tools: true
+    supports_multimodality: false
+    supports_agent: true
+    supports_scratchpads:
+      PASSTHROUGH: {}
+    similar_models: []
+
+code_completion_models:
+  "qwen2.5:3b-instruct":
+    n_ctx: 2000
+    supports_tools: true
+    supports_multimodality: false
+    supports_agent: true
+    supports_scratchpads:
+      PASSTHROUGH: {}
+    default_scratchpad: "PASSTHROUGH"
+
+tokenizer_rewrite_path:
+  "qwen2.5": "unsloth/Qwen2.5-3B-Instruct"
